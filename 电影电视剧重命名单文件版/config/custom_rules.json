@@ -1,0 +1,33 @@
+{
+  "title_patterns": [
+    "\\b(电影|Movie|Film)\\b",
+    "\\b(电视剧|TV|Series)\\b",
+    "\\b(动画|Anime|Cartoon)\\b"
+  ],
+  "exclude_patterns": [
+    "\\b(sample|trailer|preview)\\b",
+    "\\b(广告|广告片)\\b"
+  ],
+  "quality_weights": {
+    "4K": 1.0,
+    "1080p": 0.8,
+    "720p": 0.6,
+    "480p": 0.4
+  },
+  "language_weights": {
+    "中文": 1.0,
+    "英文": 0.8,
+    "日文": 0.7,
+    "韩文": 0.7
+  },
+  "custom_categories": {
+    "纪录片": [
+      "\\b(纪录片|Documentary|Doc)\\b",
+      "\\b(探索|Discovery|BBC)\\b"
+    ],
+    "综艺": [
+      "\\b(综艺|Variety|Show)\\b",
+      "\\b(娱乐|Entertainment)\\b"
+    ]
+  }
+} 

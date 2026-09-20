@@ -1,0 +1,27 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# ===== 运行日志 =====
+logs/
+*.log
+
+# ===== 备份与缓存（不同步，仅本地保留） =====
+backups/
+config_backups/
+.backups/
+*.cache.json
+media_rename_cache.json
+*cache*.json
+
+# ===== 系统/编辑器文件 =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

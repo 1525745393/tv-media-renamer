@@ -1,0 +1,72 @@
+{
+  "category_patterns": {
+    "电影": {
+      "patterns": [
+        "\\b(电影|Movie|Film|Cinema)\\b",
+        "\\.(mp4|mkv|avi|mov|wmv|flv|webm)$",
+        "\\d{4}",
+        "\\b(BluRay|HDTV|WEB-DL|HDRip|BRRip|DVDRip)\\b"
+      ],
+      "exclude_patterns": [
+        "[Ss]\\d{1,2}[Ee]\\d{1,2}",
+        "\\b(Season|Episode|S\\d{2}E\\d{2})\\b"
+      ]
+    },
+    "电视剧": {
+      "patterns": [
+        "\\b(电视剧|剧集|TV|Series|Show)\\b",
+        "[Ss]\\d{1,2}[Ee]\\d{1,2}",
+        "\\b(Season|Episode|S\\d{2}E\\d{2})\\b",
+        "\\b(第\\d+季|第\\d+集)\\b"
+      ],
+      "exclude_patterns": []
+    },
+    "动画": {
+      "patterns": [
+        "\\b(动画|Anime|Cartoon|Animation)\\b",
+        "\\b(动漫|日本动画)\\b",
+        "\\.(mp4|mkv|avi)$",
+        "\\b(BD|BluRay|HDTV)\\b"
+      ],
+      "exclude_patterns": []
+    },
+    "纪录片": {
+      "patterns": [
+        "\\b(纪录片|Documentary|Doc)\\b",
+        "\\b(探索|Discovery|BBC|National Geographic)\\b",
+        "\\b(历史|History|Nature|Science)\\b"
+      ],
+      "exclude_patterns": []
+    },
+    "综艺": {
+      "patterns": [
+        "\\b(综艺|Variety|Show|Entertainment)\\b",
+        "\\b(娱乐|Entertainment|Comedy)\\b",
+        "\\b(访谈|Talk Show|Interview)\\b"
+      ],
+      "exclude_patterns": []
+    },
+    "音乐": {
+      "patterns": [
+        "\\b(音乐|Music|Concert|Live)\\b",
+        "\\b(演唱会|Live|Concert|MTV)\\b",
+        "\\.(mp3|flac|wav|aac|m4a)$"
+      ],
+      "exclude_patterns": []
+    }
+  },
+  "quality_patterns": {
+    "4K": "\\b(4K|2160p|UHD|UltraHD)\\b",
+    "1080p": "\\b(1080p|FHD|FullHD)\\b",
+    "720p": "\\b(720p|HD)\\b",
+    "480p": "\\b(480p|SD)\\b"
+  },
+  "source_patterns": {
+    "BluRay": "\\b(BluRay|Blu-Ray|BD)\\b",
+    "HDTV": "\\b(HDTV|TVRip)\\b",
+    "WEB-DL": "\\b(WEB-DL|WebRip|WEB)\\b",
+    "HDRip": "\\b(HDRip|HD-Rip)\\b",
+    "BRRip": "\\b(BRRip|BR-Rip)\\b",
+    "DVDRip": "\\b(DVDRip|DVD-Rip)\\b"
+  }
+} 
