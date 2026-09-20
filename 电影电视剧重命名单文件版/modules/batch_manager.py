@@ -436,12 +436,12 @@ class BatchOperationDialog(QDialog):
         results = self.batch_manager.batch_move_files(selected_files, target_folder, organize_by_type)
         
         # 显示结果
-        result_text = f"批量移动完成:\n"
+        result_text = "批量移动完成:\n"
         result_text += f"成功: {results['success']} 个文件\n"
         result_text += f"失败: {results['failed']} 个文件\n"
         
         if results['errors']:
-            result_text += f"\n错误详情:\n"
+            result_text += "\n错误详情:\n"
             for error in results['errors'][:5]:  # 只显示前5个错误
                 result_text += f"• {error}\n"
             if len(results['errors']) > 5:

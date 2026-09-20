@@ -775,7 +775,7 @@ class RenameUI(QWidget):
             type_counts[file_type] = type_counts.get(file_type, 0) + 1
         
         # 显示详细结果统计
-        stats_text = f"📊 扫描统计：\n"
+        stats_text = "📊 扫描统计：\n"
         for file_type, count in type_counts.items():
             stats_text += f"• {file_type}: {count} 个文件\n"
         
@@ -1480,7 +1480,7 @@ class RenameUI(QWidget):
             
             # 显示历史记录摘要
             history_summary = self.operation_history.get_history_summary()
-            report_text += f"📋 操作历史:\n"
+            report_text += "📋 操作历史:\n"
             report_text += f"   总操作数: {history_summary['total_operations']}\n"
             report_text += f"   成功操作: {history_summary['successful_operations']}\n"
             report_text += f"   失败操作: {history_summary['failed_operations']}\n"

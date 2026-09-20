@@ -626,26 +626,26 @@ class SmartAnalysisDialog(QDialog):
         for file_type, count in analysis_summary['file_types'].items():
             stats_text += f"    {file_type}: {count} 个文件\n"
         
-        stats_text += f"""
+        stats_text += """
   媒体类型分布:
 """
         for media_type, count in analysis_summary['media_types'].items():
             stats_text += f"    {media_type}: {count} 个文件\n"
         
-        stats_text += f"""
+        stats_text += """
   年份分布:
 """
         for year, count in analysis_summary['years'].items():
             stats_text += f"    {year}: {count} 个文件\n"
         
-        stats_text += f"""
+        stats_text += """
 🏷️ 分类统计:
   主分类分布:
 """
         for category, count in classification_summary['primary_categories'].items():
             stats_text += f"    {category}: {count} 个文件\n"
         
-        stats_text += f"""
+        stats_text += """
   次分类分布:
 """
         for category, count in classification_summary['secondary_categories'].items():

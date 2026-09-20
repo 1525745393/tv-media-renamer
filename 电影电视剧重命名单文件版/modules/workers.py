@@ -475,7 +475,7 @@ class RenameWorker(QThread):
             else:
                 message = f"成功重命名 {success_count} 个文件，失败 {error_count} 个文件"
                 if error_messages:
-                    message += f"\n\n错误详情:\n" + "\n".join(error_messages[:5])  # 只显示前5个错误
+                    message += "\n\n错误详情:\n" + "\n".join(error_messages[:5])  # 只显示前5个错误
                 self.rename_completed.emit(False, message)
             
         except Exception as e:

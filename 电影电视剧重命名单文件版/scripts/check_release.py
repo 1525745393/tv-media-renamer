@@ -30,9 +30,11 @@ SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
 def load_version() -> str:
     """从 core/version.py 读取 __version__。"""
-    ns = {}
+    ns: dict[str, object] = {}
     exec((PROJECT_ROOT / "core" / "version.py").read_text(encoding="utf-8"), ns)
     version = ns.get("__version__", "")
+    if not isinstance(version, str):
+        version = ""
     if not SEMVER_RE.match(version):
         raise ValueError(f"core/version.py 中 __version__ 非法: {version!r}（应为 SemVer x.y.z）")
     return version
@@ -116,19 +118,19 @@ def main() -> int:
     changelog = REPO_ROOT / "CHANGELOG.md"
     if not changelog.exists():
         failures.append(f"未找到 {changelog.relative_to(REPO_ROOT)}")
-        print(f"[Changelog] ✗ 文件缺失")
+        print("[Changelog] ✗ 文件缺失")
     else:
         try:
             cl_version, cl_date, categories = load_changelog_head(changelog)
             print(f"[Changelog] 最新区块 [{cl_version}] {cl_date}  ✓")
             if args.release and cl_version == "Unreleased":
                 failures.append(f"CHANGELOG 顶部是 [Unreleased]，发布前应改为具体版本 [{version}]")
-                print(f"[Changelog] ✗ 顶部为 Unreleased，尚未整理为正式版本")
+                print("[Changelog] ✗ 顶部为 Unreleased，尚未整理为正式版本")
             elif args.release and version and cl_version != version:
                 failures.append(f"版本不一致: version.py={version} vs CHANGELOG={cl_version}")
                 print(f"[Changelog] ✗ 版本不一致: version.py={version} vs CHANGELOG={cl_version}")
             else:
-                print(f"[Changelog] ✓ 与 version.py 一致" if version else "[Changelog] ✓")
+                print("[Changelog] ✓ 与 version.py 一致" if version else "[Changelog] ✓")
             # 分类合法性（Keep a Changelog：只要求出现的分类属于六类之一，不要求每版本齐全）
             invalid = [c for c in categories if c not in REQUIRED_CATEGORIES]
             if invalid:

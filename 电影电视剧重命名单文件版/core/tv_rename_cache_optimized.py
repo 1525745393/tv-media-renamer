@@ -3132,7 +3132,7 @@ class MediaRenamer:
         print(f"  自动清理过期缓存: {'开启' if self.settings.get('cache_auto_cleanup', True) else '关闭'}")
         print(f"  缓存最大大小: {self.settings.get('cache_max_size_mb', 100)} MB")
         print(f"  历史记录缓冲区大小: {self.history_buffer_size}")
-        print(f"  I/O优化: 启用")
+        print("  I/O优化: 启用")
 
     def _validate_file_path(self, file_path: str) -> Tuple[bool, str]:
         """验证文件路径安全性"""
@@ -3314,7 +3314,7 @@ class MediaRenamer:
         # 错误摘要
         error_summary = stats['error_summary']
         if error_summary['total_errors'] > 0:
-            print(Fore.RED + f"\n错误统计:")
+            print(Fore.RED + "\n错误统计:")
             print(Fore.RED + f"总错误数: {error_summary['total_errors']}")
             for error_type, count in error_summary['error_types'].items():
                 print(Fore.RED + f"  {error_type}: {count}次")
@@ -3322,7 +3322,7 @@ class MediaRenamer:
         # v1.3新增：显示性能监控信息
         if self.settings.get("performance_monitoring", True):
             perf_summary = self.performance_monitor.get_performance_summary()
-            print(Fore.MAGENTA + f"\n性能监控:")
+            print(Fore.MAGENTA + "\n性能监控:")
             print(Fore.MAGENTA + f"当前内存使用: {perf_summary['current_memory_mb']:.1f} MB")
             print(Fore.MAGENTA + f"内存趋势: {perf_summary['memory_trend']}")
             print(Fore.MAGENTA + f"平均操作时间: {perf_summary['avg_operation_time']:.3f} 秒")
@@ -3374,7 +3374,7 @@ class MediaRenamer:
         if self.config_manager.export_config(export_file):
             print(Fore.GREEN + f"✅ 配置已导出到: {export_file}")
         else:
-            print(Fore.RED + f"❌ 配置导出失败")
+            print(Fore.RED + "❌ 配置导出失败")
     
     def import_config(self, import_file: str):
         """导入配置"""
@@ -3383,7 +3383,7 @@ class MediaRenamer:
             # 重新加载配置
             self.settings.update(self.config_manager.settings)
         else:
-            print(Fore.RED + f"❌ 配置导入失败")
+            print(Fore.RED + "❌ 配置导入失败")
     
     def show_smart_analysis(self, file_path: str):
         """显示智能分析结果"""
@@ -3943,7 +3943,7 @@ def interactive_settings():
             print(Fore.GREEN + f"✅ 安全级别: {settings['security_level']}")
         else:
             settings['security_level'] = "high"
-            print(Fore.YELLOW + f"ℹ️ 使用默认安全级别: high")
+            print(Fore.YELLOW + "ℹ️ 使用默认安全级别: high")
         
         print(Fore.MAGENTA + "==== v1.3 智能优化设置结束 ====")
     except KeyboardInterrupt:
