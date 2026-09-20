@@ -64,6 +64,8 @@ from datetime import datetime
 import time
 from collections import defaultdict
 from colorama import init, Fore, Style
+# 基础默认配置统一来源于 core/constants.py（单一来源），本文件仅覆盖运行引擎需要的差异键
+from core.constants import DEFAULT_SETTINGS as _BASE_DEFAULT_SETTINGS
 # 在文件头部导入 guessit
 try:
     from guessit import guessit
@@ -1003,7 +1005,11 @@ class PerformanceMonitor:
         self.success_counts.clear()
 
 # ===================== 常量定义 =====================
+# 基础配置来源于 core/constants.py，此处仅覆盖/扩展运行引擎需要的差异键；
+# 新增配置键请优先维护在 core/constants.py，避免两处漂移。
 DEFAULT_SETTINGS = {
+    **_BASE_DEFAULT_SETTINGS,
+    # 路径与命名模板（模板必须包含 {ext}，渲染时直接 format）
     "folder_path": "/volume2/NAS2/video2/影视库",  # 建议修改为你的实际影视库路径
     "movie_template": "{title} ({year}){ext}",  # 电影命名模板
     "tv_template": "{title}.S{season:02d}.E{episode:02d}{ext}",  # 电视剧命名模板
@@ -1012,7 +1018,7 @@ DEFAULT_SETTINGS = {
     "video_extensions": [
         ".mp4", ".mkv", ".avi", ".mov", ".ts", ".flv", ".wmv", ".mpg", ".mpeg", ".rmvb", ".webm"
     ],
-    "metadata_extensions": [".srt", ".nfo", ".ass", ".vsmeta", ".sub"],
+    "metadata_extensions": [".srt", ".nfo", ".ass", ".vsmeta", ".sub", ".ssa"],
     # v1.3新增配置
     "sandbox_mode": True,  # 是否启用沙盒模式
     "sandbox_dir": ".sandbox",  # 沙盒目录
