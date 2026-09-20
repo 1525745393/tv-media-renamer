@@ -18,12 +18,20 @@
 - 发布前自动验证脚本 `scripts/check_release.py`（版本一致性 / CHANGELOG 完整性 / 可选测试回归）
 - GitHub Actions CI：push/PR 自动运行全功能测试与核心引擎测试
 - MIT License
+- 一键发布脚本 `scripts/release.py`：一条命令完成 验证 → Changelog 升级 → 打 tag → 推送 → 自动发布
+- 性能基准测试 `scripts/benchmark.py`：9 类标准用例计时，结果自动对比历史基准
+- 应用内升级检测 `core/update_checker.py`：启动后后台查询 GitHub 最新 Release，有新版自动提示
+- 预发布流程：`v*-rc.*` / `v*-beta.*` 标签自动构建 prerelease，不推送给普通用户
 
 ### 改进
 - 配置来源统一：`core/tv_rename_cache_optimized.py` 的 `DEFAULT_SETTINGS` 改为从 `core/constants.py` 导入基础配置，消除两套配置漂移
 - 核心模块拆分：`PatternRecognizer` / `ConfigManager` / `InteractiveHandler` 拆出为独立文件，原文件 5205 → 4471 行
 - 清理生产代码 63 处未使用导入及死代码
 - 缓存版本检查与 UI 标题改为引用 `core/version.py`，升级版本号后旧缓存自动失效重建
+- 发布流程优化：CI 增加 pip 依赖缓存、编译检查、导入冒烟、GUI 启动验证；ruff（F/E9）与 mypy（新代码渐进式）纳入自动门禁
+- 发布验证增强：版本兼容性检查（Python 范围 / 依赖清单 / 入口文件 / 模块导入）与性能基准测试纳入 check_release
+- 发布安全增强：Release 自动生成 SHA256 校验文件；workflow 权限最小化；构建产物自动冒烟验证
+- 发布说明自动生成：CHANGELOG 提取 + 下载校验指引；预发布标签自动标记 prerelease
 
 ### 修复
 - 移除编码损坏无法编译的单文件版 `tv_rename_gui.py`（源文件含 64 处 U+FFFD，不可恢复）

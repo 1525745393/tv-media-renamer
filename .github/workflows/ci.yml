@@ -15,6 +15,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            电影电视剧重命名单文件版/main/requirements.txt
+            电影电视剧重命名单文件版/requirements-dev.txt
 
       - name: 安装系统依赖（PyQt5 offscreen 渲染）
         run: |
@@ -27,6 +31,10 @@ jobs:
           pip install -r main/requirements.txt
           pip install -r requirements-dev.txt
 
+      - name: 编译检查（全量字节码编译）
+        working-directory: 电影电视剧重命名单文件版
+        run: python3 -m compileall -q core ui modules main scripts/check_release.py
+
       - name: Lint（ruff：未使用导入/语法错误类）
         working-directory: 电影电视剧重命名单文件版
         run: ruff check core/ ui/ modules/ main/ scripts/check_release.py --select F,E9
@@ -34,6 +42,17 @@ jobs:
       - name: 类型检查（mypy：新代码渐进式）
         working-directory: 电影电视剧重命名单文件版
         run: mypy core/version.py scripts/check_release.py --ignore-missing-imports --follow-imports=skip
+
+      - name: 导入冒烟（关键模块 + GUI 启动）
+        working-directory: 电影电视剧重命名单文件版
+        env:
+          PYTHONPATH: .
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python3 -c "from core.version import VERSION; assert VERSION"
+          python3 -c "from core.pattern_recognizer import PatternRecognizer; PatternRecognizer()"
+          python3 -c "from core.update_checker import UpdateChecker; UpdateChecker('0.0.1').check_async()"
+          python3 -c "import sys; from PyQt5.QtWidgets import QApplication; a = QApplication(sys.argv); from ui.main_window import RenameUI; w = RenameUI(); assert w.windowTitle()"
 
       - name: 全功能测试
         working-directory: 电影电视剧重命名单文件版

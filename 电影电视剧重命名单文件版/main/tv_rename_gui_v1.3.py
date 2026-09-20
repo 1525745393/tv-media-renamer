@@ -164,6 +164,15 @@ def main():
         main_window = RenameUI()
         main_window.show()
         
+        # 后台升级检测（静默，不影响启动）
+        try:
+            from core.update_checker import UpdateChecker
+            checker = UpdateChecker(version=VERSION)
+            checker.check_async()
+            logging.info("🔍 后台升级检测已启动（当前版本 %s）", VERSION)
+        except Exception:
+            logging.debug("升级检测初始化失败（忽略）", exc_info=True)
+        
         # 记录启动信息
         logging.info("✅ 主窗口已显示，程序启动成功")
         logging.info("🎯 功能特性:")

@@ -1,13 +1,11 @@
 name: Release
 
 # 推送版本标签（v*）时自动：验证 → 构建（Linux + Windows）→ 发布 GitHub Release
+# 预发布：tag 形如 v1.4.0-rc.1 / v1.4.0-beta.1 时创建 prerelease（标记为预发布）
 on:
   push:
     tags:
       - 'v*'
-
-permissions:
-  contents: write
 
 jobs:
   verify:
@@ -19,6 +17,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            电影电视剧重命名单文件版/main/requirements.txt
+            电影电视剧重命名单文件版/requirements-dev.txt
 
       - name: 安装系统依赖（PyQt5 offscreen）
         run: |
@@ -31,23 +33,10 @@ jobs:
           pip install -r main/requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Lint
+      # 发布模式校验：版本一致性 + Changelog 合法性 + 兼容性 + 测试回归 + 性能基准
+      - name: 发布模式校验（含测试与基准）
         working-directory: 电影电视剧重命名单文件版
-        run: ruff check core/ ui/ modules/ main/ scripts/check_release.py --select F,E9
-
-      - name: 类型检查
-        working-directory: 电影电视剧重命名单文件版
-        run: mypy core/version.py scripts/check_release.py --ignore-missing-imports --follow-imports=skip
-
-      - name: 全功能测试
-        working-directory: 电影电视剧重命名单文件版
-        env:
-          QT_QPA_PLATFORM: offscreen
-        run: python3 tests/test_all_features.py
-
-      - name: 发布模式校验（版本一致性 + Changelog）
-        working-directory: 电影电视剧重命名单文件版
-        run: python3 scripts/check_release.py --release --run-tests
+        run: python3 scripts/check_release.py --release --check-git --run-tests --benchmark
 
   build-linux:
     name: 构建 Linux 版
@@ -59,6 +48,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            电影电视剧重命名单文件版/main/requirements.txt
 
       - name: 安装系统依赖（PyQt5 运行库）
         run: |
@@ -74,6 +66,14 @@ jobs:
             --paths . \
             --exclude-module guessit --exclude-module rebulk \
             main/tv_rename_gui_v1.3.py
+
+      - name: 打包产物冒烟（offscreen 启动验证）
+        working-directory: 电影电视剧重命名单文件版
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          timeout 8 ./dist/tv-media-renamer-linux/tv-media-renamer-linux >/tmp/smoke.log 2>&1 || true
+          grep -q "启动影视文件重命名工具" /tmp/smoke.log && echo "✅ 产物启动正常" || (echo "❌ 产物启动异常"; cat /tmp/smoke.log; exit 1)
 
       - name: 压缩产物
         working-directory: 电影电视剧重命名单文件版
@@ -94,6 +94,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            电影电视剧重命名单文件版/main/requirements.txt
 
       - name: 安装依赖并打包
         working-directory: 电影电视剧重命名单文件版
@@ -119,6 +122,8 @@ jobs:
     name: 发布 Release
     needs: [build-linux, build-windows]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write          # 仅发布 job 需要写权限（最小权限原则）
     steps:
       - uses: actions/checkout@v4
 
@@ -126,30 +131,59 @@ jobs:
         with:
           path: artifacts
 
-      - name: 生成 Release 说明（从 CHANGELOG 提取）
+      - name: 生成 Release 说明（CHANGELOG 提取 + 校验指引）
         run: |
           python3 - <<'EOF'
           import re
           text = open('CHANGELOG.md', encoding='utf-8').read()
-          # 找第一个正式版本块（[x.y.z] - 日期）
           m = re.search(r'^## \[([\d.]+)\] - (.+)$', text, re.M)
           if not m:
-              print(f"请更新 CHANGELOG.md 后再发布（未找到正式版本块）", file=open('release_notes.txt', 'w'))
+              open('release_notes.txt', 'w', encoding='utf-8').write("请更新 CHANGELOG.md 后再发布（未找到正式版本块）")
               raise SystemExit(1)
           ver, date = m.group(1), m.group(2)
           end = text.find('\n## [', m.end())
           body = text[m.end():end if end != -1 else len(text)].strip()
-          notes = f"## 影视文件智能重命名工具 {ver}（{date}）\n\n{body}"
+          notes = (
+              f"## 影视文件智能重命名工具 {ver}（{date}）\n\n{body}\n\n"
+              f"---\n### 下载与校验\n"
+              f"- **Linux**：`tv-media-renamer-linux.tar.gz`（解压后运行 `tv-media-renamer-linux`）\n"
+              f"- **Windows**：`tv-media-renamer-windows.zip`\n"
+              f"- 下载后请校验 SHA256：`shasum -a 256 <文件>` 与 `SHA256SUMS.txt` 对比\n"
+              f"- 应用内置升级检测：启动后自动检查新版本\n"
+          )
           open('release_notes.txt', 'w', encoding='utf-8').write(notes)
-          print(f"已生成 {ver} 的 Release 说明")
+          print(f"已生成 {ver} 的 Release 说明（含校验指引）")
           EOF
+
+      - name: 生成 SHA256 校验文件
+        run: |
+          cd artifacts
+          find . \( -name "*.tar.gz" -o -name "*.zip" \) | sort | xargs shasum -a 256 > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: 判断预发布标签
+        id: prerelease
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [[ "$TAG" =~ -(rc|beta|alpha|pre)\.[0-9]+$ ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: 创建 Release 并上传资产
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          PRERELEASE_FLAG=""
+          if [ "${{ steps.prerelease.outputs.is_prerelease }}" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+            echo "→ 预发布版本（prerelease）"
+          fi
           gh release create "${{ github.ref_name }}" \
             --title "影视文件智能重命名工具 ${{ github.ref_name }}" \
             --notes-file release_notes.txt \
+            $PRERELEASE_FLAG \
             artifacts/linux-build/tv-media-renamer-linux.tar.gz \
-            artifacts/windows-build/tv-media-renamer-windows.zip
+            artifacts/windows-build/tv-media-renamer-windows.zip \
+            artifacts/SHA256SUMS.txt
