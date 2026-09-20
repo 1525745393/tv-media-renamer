@@ -1019,7 +1019,7 @@ DEFAULT_SETTINGS = {
     "parallel_processing": True,  # 是否启用并行处理
     "max_workers": 4,  # 最大并行工作线程数
     "auto_cleanup": True,  # 是否自动清理缓存和临时文件
-    "cache_ttl": 86400,  # 缓存有效期（秒）
+    "cache_ttl": 3600,  # 缓存有效期（秒）- 默认1小时
     "operation_timeout": 30,  # 单个操作超时时间（秒）
     "max_retries": 3,  # 操作失败最大重试次数
     "security_level": "high",  # 安全级别：low, medium, high
@@ -1034,7 +1034,6 @@ DEFAULT_SETTINGS = {
     "enable_history": True,
     "skip_existing": True,
     "preview_page_size": 10,
-    "cache_ttl": 300,  # 缓存有效期（秒）
     "enable_hash_check": False,  # 是否启用哈希检查
     "tv_folder_keywords": ["电视剧", "剧集", "TV", "Series"],  # 电视剧文件夹关键词
     "movie_folder_keywords": ["电影", "Movie", "Film"],  # 电影文件夹关键词
