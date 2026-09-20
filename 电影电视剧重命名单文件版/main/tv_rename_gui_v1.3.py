@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QCoreApplication
 
 # 导入自定义模块
+from core.version import APP_NAME, VERSION
 from ui.main_window import RenameUI
 
 def setup_logging():
@@ -98,8 +99,8 @@ def setup_application():
         pass
 
     app = QApplication(sys.argv)
-    app.setApplicationName("影视文件重命名工具 v1.3 智能分析版")
-    app.setApplicationVersion("1.3")
+    app.setApplicationName(f"{APP_NAME} v{VERSION} 智能分析版")
+    app.setApplicationVersion(VERSION)
     app.setOrganizationName("MediaRenameTool")
     app.setOrganizationDomain("mediarenametool.com")
     # app.setWindowIcon(QIcon("icon.ico"))

@@ -63,6 +63,7 @@ from collections import defaultdict
 from colorama import init, Fore
 # 基础默认配置统一来源于 core/constants.py（单一来源），本文件仅覆盖运行引擎需要的差异键
 from core.constants import DEFAULT_SETTINGS as _BASE_DEFAULT_SETTINGS
+from core.version import VERSION
 from core.interactive_handler import InteractiveHandler
 from core.config_manager import ConfigManager
 from core.pattern_recognizer import PatternRecognizer
@@ -1263,8 +1264,8 @@ class MediaRenamer:
                 if field not in cache_data:
                     return False
             
-            # 检查版本兼容性
-            if cache_data.get('version') != '1.3':
+            # 检查版本兼容性（版本号来自 core/version.py，升级后旧缓存自动失效重建）
+            if cache_data.get('version') != VERSION:
                 return False
                 
             return True

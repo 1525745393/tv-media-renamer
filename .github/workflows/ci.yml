@@ -37,3 +37,7 @@ jobs:
           PYTHONPATH: .
           QT_QPA_PLATFORM: offscreen
         run: python3 tests/test_media_renamer.py
+
+      - name: 版本与 Changelog 校验
+        working-directory: 电影电视剧重命名单文件版
+        run: python3 scripts/check_release.py
