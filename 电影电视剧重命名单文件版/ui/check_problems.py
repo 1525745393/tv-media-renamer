@@ -6,7 +6,6 @@
 
 import sys
 import os
-import traceback
 
 def check_imports():
     """检查导入问题"""

@@ -8,9 +8,7 @@ import os
 import shutil
 import stat
 import logging
-import hashlib
-from typing import Dict, Any, List, Optional, Tuple
-from pathlib import Path
+from typing import Dict, Any, List, Tuple
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

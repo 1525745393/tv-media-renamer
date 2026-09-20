@@ -4,21 +4,11 @@
 设置对话框模块 - 影视文件重命名工具 v1.3
 """
 
-from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox,
-    QLineEdit, QSpinBox, QCheckBox, QComboBox, QPushButton,
-    QTabWidget, QWidget, QTextEdit, QScrollArea, QFileDialog,
-    QMessageBox, QDialogButtonBox, QLabel
-)
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QLineEdit, QSpinBox, QCheckBox, QComboBox, QPushButton, QTabWidget, QWidget, QTextEdit, QScrollArea, QFileDialog, QDialogButtonBox, QLabel
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
 from typing import Dict, Any
-import json
 import os
 
-from core.tv_rename_cache_optimized import MediaRenamer, PatternRecognizer
-from core.performance.performance_monitor import PerformanceMonitor
-from core.security.security_manager import SecurityManager
 
 class SettingsDialog(QDialog):
     """设置对话框"""

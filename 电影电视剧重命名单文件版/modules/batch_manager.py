@@ -8,16 +8,11 @@
 import os
 import shutil
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any
 from datetime import datetime
-from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
-    QTableWidget, QTableWidgetItem, QHeaderView, QCheckBox,
-    QGroupBox, QComboBox, QSpinBox, QTextEdit, QMessageBox,
-    QProgressDialog, QFileDialog, QLineEdit, QFormLayout
-)
-from PyQt5.QtCore import Qt, pyqtSignal, QThread
-from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTableWidget, QTableWidgetItem, QHeaderView, QCheckBox, QGroupBox, QComboBox, QMessageBox, QFileDialog, QFormLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 
 logger = logging.getLogger(__name__)
 

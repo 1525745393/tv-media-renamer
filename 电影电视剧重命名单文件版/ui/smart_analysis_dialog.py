@@ -6,15 +6,10 @@
 
 import os
 import logging
-from typing import Dict, Any, List, Optional
-from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QTabWidget, QTableWidget,
-    QTableWidgetItem, QHeaderView, QPushButton, QLabel, QProgressBar,
-    QTextEdit, QGroupBox, QComboBox, QCheckBox, QSpinBox, QMessageBox,
-    QSplitter, QFrame, QScrollArea, QWidget
-)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
-from PyQt5.QtGui import QFont, QColor
+from typing import Dict, Any, List
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTabWidget, QTableWidget, QTableWidgetItem, QHeaderView, QPushButton, QLabel, QProgressBar, QTextEdit, QGroupBox, QMessageBox, QWidget
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtGui import QColor
 
 from modules.enhanced_analyzer import EnhancedAnalyzer
 from modules.file_classifier import FileClassifier, ClassificationResult

@@ -4,12 +4,8 @@
 帮助对话框模块 - 影视文件重命名工具 v1.3
 """
 
-from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QTabWidget, QWidget,
-    QPushButton, QLabel, QTextEdit, QScrollArea, QGroupBox
-)
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTabWidget, QWidget, QPushButton, QTextEdit, QScrollArea, QGroupBox
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
 
 class HelpDialog(QDialog):
     """帮助对话框"""

@@ -4,12 +4,7 @@
 控制面板模块 - 影视文件重命名工具 v1.3
 """
 
-from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, 
-    QLineEdit, QGroupBox, QRadioButton, QButtonGroup, QFrame
-)
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QGroupBox, QRadioButton
 
 class ControlPanel(QWidget):
     """控制面板类"""

@@ -4,47 +4,26 @@
 主窗口模块 - 影视文件重命名工具 v1.3
 """
 
-import sys
 import os
-import json
 import logging
-import traceback
 import psutil
 import time
 import gc
 from typing import Dict, Any, List, Optional
-from datetime import datetime
 
 # PyQt5导入
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QLineEdit, QComboBox, QTableWidget,
-    QTableWidgetItem, QHeaderView, QGroupBox, QSplitter,
-    QStatusBar, QProgressBar, QMessageBox, QFileDialog,
-    QDialog, QTabWidget, QTextEdit, QCheckBox, QRadioButton,
-    QSpinBox, QDoubleSpinBox, QFormLayout, QGridLayout,
-    QScrollArea, QFrame, QMenu, QAction, QToolButton,
-    QProgressDialog, QDialogButtonBox
-)
-from PyQt5.QtCore import (
-    Qt, QThread, pyqtSignal, QTimer, QSize, QRect,
-    QPropertyAnimation, QEasingCurve, QParallelAnimationGroup
-)
-from PyQt5.QtGui import (
-    QFont, QIcon, QPixmap, QPalette, QColor, QCursor,
-    QKeySequence, QTextCursor
-)
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QGroupBox, QSplitter, QStatusBar, QProgressBar, QMessageBox, QFileDialog, QDialog, QProgressDialog
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QKeySequence
 
 # 导入自定义模块
 from core.constants import DEFAULT_SETTINGS
-from core.tv_rename_cache_optimized import MediaRenamer, PatternRecognizer
-from core.performance.performance_monitor import PerformanceMonitor
-from core.security.security_manager import SecurityManager
-from core.operation_history import EnhancedOperationHistory, OperationRecord
+from core.tv_rename_cache_optimized import MediaRenamer
+from core.operation_history import EnhancedOperationHistory
 from modules.file_protector import FileProtector
 from modules.enhanced_analyzer import EnhancedAnalyzer
 from modules.batch_manager import EnhancedBatchManager
-from modules.file_classifier import FileClassifier, ClassificationResult
+from modules.file_classifier import FileClassifier
 from modules.workers import ScanWorker, RenameWorker
 from ui.control_panel import ControlPanel
 from ui.file_table import FileTableWidget

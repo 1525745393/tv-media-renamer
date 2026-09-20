@@ -9,9 +9,9 @@ from PyQt5.QtWidgets import (
     QMessageBox, QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
     QTextEdit, QPushButton, QGroupBox, QSplitter, QWidget
 )
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFont, QColor
-from typing import List, Dict, Any, Optional
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
+from typing import List, Dict, Any
 
 class FileTableWidget(QTableWidget):
     """文件表格组件"""

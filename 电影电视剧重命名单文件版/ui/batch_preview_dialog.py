@@ -4,15 +4,10 @@
 批量预览对话框模块 - 影视文件重命名工具 v1.3
 """
 
-from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
-    QHeaderView, QPushButton, QLabel, QTextEdit, QGroupBox, QSplitter,
-    QProgressBar, QComboBox, QLineEdit, QCheckBox, QSpinBox, QFormLayout,
-    QMessageBox, QFileDialog, QMenu, QAction, QWidget
-)
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFont, QColor
-from typing import List, Dict, Any, Optional
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView, QPushButton, QLabel, QTextEdit, QGroupBox, QSplitter, QProgressBar, QComboBox, QLineEdit, QCheckBox, QFormLayout, QMessageBox, QFileDialog, QMenu, QAction, QWidget
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
+from typing import List, Dict, Any
 import json
 import csv
 
