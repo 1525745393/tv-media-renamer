@@ -167,8 +167,22 @@ def main():
         # 后台升级检测（静默，不影响启动）
         try:
             from core.update_checker import UpdateChecker
+            from PyQt5.QtCore import QObject, pyqtSignal
+
+            class _UpdateBridge(QObject):
+                """跨线程信号桥：后台线程 → 主线程（QueuedConnection 自动调度）"""
+                found = pyqtSignal(object)
+
+            bridge = _UpdateBridge()
+            bridge.found.connect(main_window.show_update_banner)
+
+            def _on_update_result(info):
+                # 仅当有新版本时通知主线程显示横幅
+                if info is not None and info.has_update:
+                    bridge.found.emit(info)
+
             checker = UpdateChecker(version=VERSION)
-            checker.check_async()
+            checker.check_async(on_result=_on_update_result)
             logging.info("🔍 后台升级检测已启动（当前版本 %s）", VERSION)
         except Exception:
             logging.debug("升级检测初始化失败（忽略）", exc_info=True)

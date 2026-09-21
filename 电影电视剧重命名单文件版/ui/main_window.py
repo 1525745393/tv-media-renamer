@@ -13,8 +13,8 @@ from typing import Dict, Any, List, Optional
 
 # PyQt5导入
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QGroupBox, QSplitter, QStatusBar, QProgressBar, QMessageBox, QFileDialog, QDialog, QProgressDialog
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtCore import Qt, QTimer, QUrl, QSettings
+from PyQt5.QtGui import QKeySequence, QDesktopServices
 
 # 导入自定义模块
 from core.constants import DEFAULT_SETTINGS
@@ -158,6 +158,7 @@ class RenameUI(QWidget):
         self.rename_worker: Optional[RenameWorker] = None
         self.results: List[Dict[str, Any]] = []
         self.renamer: Optional[MediaRenamer] = None
+        self._update_banner_widgets: List[QWidget] = []
         
         # 启用拖拽支持
         self.setAcceptDrops(True)
@@ -1494,6 +1495,74 @@ class RenameUI(QWidget):
             QMessageBox.warning(self, "错误", f"显示性能报告失败: {str(e)}")
             return None
 
+    # ==== 升级提示（主线程调用，信号桥保证） ====
+
+    def show_update_banner(self, info: Any) -> None:
+        """在状态栏显示升级提示横幅（可点击查看 / 不再提醒）。
+
+        由主入口的后台升级检测线程通过 Qt 信号桥调用，运行于主线程。
+        """
+        if info is None or not getattr(info, "has_update", False):
+            return
+        latest = getattr(info, "latest_version", "")
+        if not latest:
+            return
+        # 用户已选择"不再提醒"该版本则跳过
+        settings = QSettings("TVMediaRenamer", "updates")
+        if settings.value("dismissed_version", "") == latest:
+            return
+
+        # 清除旧横幅（避免重复叠加）
+        for w in list(self._update_banner_widgets):
+            self._close_update_banner(w)
+
+        banner = QWidget()
+        banner.setStyleSheet("background: #fff8e1; border: 1px solid #f0c36d; border-radius: 4px;")
+        layout = QHBoxLayout(banner)
+        layout.setContentsMargins(8, 3, 8, 3)
+        layout.setSpacing(8)
+
+        label = QLabel(f"✨ 发现新版本 {latest}")
+        label.setStyleSheet("color: #7a5c00; font-weight: bold;")
+
+        view_btn = QPushButton("查看详情")
+        view_btn.setCursor(Qt.PointingHandCursor)
+        view_btn.setStyleSheet("color: #1565c0; background: transparent; border: none; text-decoration: underline;")
+        url = getattr(info, "release_url", "")
+        view_btn.clicked.connect(lambda: self._open_update_url(url))
+
+        dismiss_btn = QPushButton("不再提醒")
+        dismiss_btn.setCursor(Qt.PointingHandCursor)
+        dismiss_btn.setStyleSheet("color: #666; background: transparent; border: none;")
+        dismiss_btn.clicked.connect(lambda: self._dismiss_update(latest, banner))
+
+        layout.addWidget(label)
+        layout.addWidget(view_btn)
+        layout.addWidget(dismiss_btn)
+        self.status_bar.addWidget(banner)
+        self._update_banner_widgets.append(banner)
+        self._update_banner_widgets = [b for b in self._update_banner_widgets if b is not None]
+
+    def _open_update_url(self, url: str) -> None:
+        """打开 Release 页面。"""
+        if url:
+            QDesktopServices.openUrl(QUrl(url))
+
+    def _dismiss_update(self, version: str, banner: QWidget) -> None:
+        """记录"不再提醒"并移除横幅。"""
+        QSettings("TVMediaRenamer", "updates").setValue("dismissed_version", version)
+        self._close_update_banner(banner)
+
+    def _close_update_banner(self, banner: QWidget) -> None:
+        """从状态栏移除横幅。"""
+        try:
+            self.status_bar.removeWidget(banner)
+        except RuntimeError:
+            pass
+        banner.deleteLater()
+        if banner in self._update_banner_widgets:
+            self._update_banner_widgets.remove(banner)
+
 
 class PerformanceMonitor:
     """性能监控类"""
@@ -1540,5 +1609,3 @@ class PerformanceMonitor:
             return sum(self.metrics[operation]) / len(self.metrics[operation])
         return 0.0
 
-
- 
