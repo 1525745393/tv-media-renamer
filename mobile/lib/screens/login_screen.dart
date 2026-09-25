@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/api_client.dart';
+import 'folder_screen.dart';
 
 /// 登录页：填写 NAS 服务地址与 API Token。
 /// 凭据保存在本地（shared_preferences），下次启动自动恢复。

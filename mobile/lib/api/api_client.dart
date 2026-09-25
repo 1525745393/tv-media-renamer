@@ -29,14 +29,15 @@ class ApiClient {
     return jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
   }
 
-  Future<dynamic> _postJson(String path, Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> _postJson(
+      String path, Map<String, dynamic> body) async {
     final resp = await http
         .post(_uri(path), headers: _headers, body: jsonEncode(body))
         .timeout(const Duration(seconds: 30));
     if (resp.statusCode != 200) {
       throw ApiException(resp.statusCode, _detail(resp.body));
     }
-    return jsonDecode(utf8.decode(resp.bodyBytes));
+    return jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
   }
 
   String _detail(String body) {

@@ -119,14 +119,11 @@ jobs:
       - name: 代码分析（只以 error 阻断）
         working-directory: mobile
         run: |
-          set +e
-          flutter analyze --no-pub > /tmp/analyze.txt 2>&1
-          set -e
-          ERROR_COUNT=$(grep -c "^   error •" /tmp/analyze.txt || true)
-          echo "📊 error: $ERROR_COUNT, warning: $(grep -c '^   warning •' /tmp/analyze.txt || true), info: $(grep -c '^   info •' /tmp/analyze.txt || true)"
-          if [ "$ERROR_COUNT" -gt 0 ]; then
-            echo "❌ 发现 error 级别问题："
-            grep "^   error •" /tmp/analyze.txt
+          flutter analyze --no-pub 2>&1 | tee /tmp/analyze.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "ℹ️  flutter analyze 退出码: $EXIT_CODE（非 0 = 存在 error 级别问题）"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "❌ flutter analyze 检测到 error 级别问题"
             exit 1
           fi
           echo "✅ 无 error 级别问题"
