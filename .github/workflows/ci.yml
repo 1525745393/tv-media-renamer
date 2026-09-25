@@ -150,6 +150,14 @@ jobs:
           }
           echo "✅ Debug APK 构建成功"
 
+      - name: 上传构建诊断日志（失败时）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-build-log
+          path: /tmp/fb.log
+          if-no-files-found: ignore
+
       - name: 上传 Debug APK
         uses: actions/upload-artifact@v4
         with:
