@@ -1,0 +1,17 @@
+[tool.semantic_release]
+# 版本号唯一来源：电影电视剧重命名单文件版/core/version.py 的 __version__
+version_variables = ["电影电视剧重命名单文件版/core/version.py:__version__"]
+# 标签格式：v1.5.0（与三个发布工作流的 tag 触发规则一致）
+tag_format = "v{version}"
+# 提交解析：Conventional Commits（feat=minor / fix,perf=patch / 其余不升版）
+commit_parser = "conventional"
+# 本项目不做构建产物生成（打包由各发布工作流完成）
+build_command = ""
+
+[tool.semantic_release.changelog]
+mode = "update"
+# 插入锚点：现有 CHANGELOG.md 头部已放置该注释
+insertion_flag = "<!-- version list -->"
+# 自定义模板目录（相对仓库根）
+template_dir = "templates"
+changelog_file = "CHANGELOG.md"

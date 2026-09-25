@@ -1,0 +1,55 @@
+name: Semantic Release
+# 全自动语义化发版：
+# - 监听 main 分支 push，使用 Conventional Commits 分析版本增量
+# - feat → MINOR、fix/perf → PATCH、其余不升版
+# - 自动更新 core/version.py、生成 CHANGELOG.md、打 vX.Y.Z 标签
+# - 标签触发既有三个发布工作流（Release / Docker Release / Android Release）
+# - 使用 PAT（SEMANTIC_RELEASE_TOKEN）打标签，确保触发下游工作流
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '.github/workflows/semantic-release.yml'
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+      - name: 防循环（跳过 semantic-release 自身提交）
+        id: guard
+        run: |
+          AUTHOR="$(git log -1 --format='%an')"
+          if [ "$AUTHOR" = "semantic-release" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "最近提交作者: $AUTHOR"
+      - name: 安装 python-semantic-release
+        if: steps.guard.outputs.skip == 'false'
+        run: python -m pip install python-semantic-release==10.7.0
+      - name: 执行语义化发版
+        if: steps.guard.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+        run: |
+          git config user.name "semantic-release"
+          git config user.email "semantic-release"
+          semantic-release version --no-vcs-release
+      - name: 同步 RELEASE_DATE（仅发版成功时）
+        if: steps.guard.outputs.skip == 'false'
+        run: |
+          if git log -1 --format='%an' | grep -qx "semantic-release"; then
+            TODAY="$(date +%F)"
+            sed -i "s/RELEASE_DATE = \".*\"/RELEASE_DATE = \"$TODAY\"/" 电影电视剧重命名单文件版/core/version.py
+            git add 电影电视剧重命名单文件版/core/version.py
+            git commit -m "chore(release): 同步 RELEASE_DATE 为 $TODAY"
+            git push
+          else
+            echo "本次无版本发布，跳过"
+          fi

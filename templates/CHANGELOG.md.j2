@@ -1,0 +1,96 @@
+{# 自定义 CHANGELOG 模板（python-semantic-release v10）
+   输出格式与 scripts/check_release.py 的解析规则兼容：
+   - 版本行：## [x.y.z] - YYYY-MM-DD
+   - Unreleased 区块：## [Unreleased]
+   - 分类标题使用中文六类：新增/改进/废弃/移除/修复/安全
+#}
+{% set type_names = {
+    "features": "新增",
+    "bug fixes": "修复",
+    "performance improvements": "改进",
+    "refactoring": "改进",
+    "documentation": "改进",
+    "code style": "改进",
+    "testing": "改进",
+    "build system": "改进",
+    "continuous integration": "改进",
+    "chores": "改进"
+} %}
+{% set insertion_flag = ctx.changelog_insertion_flag %}
+{%- if ctx.changelog_mode == "init" -%}
+# 变更日志
+
+所有重要变更都会记录在此文件中。
+
+本文件格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
+版本遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+
+{{ insertion_flag }}
+
+{%- if ctx.history.unreleased | length > 0 %}
+
+## [Unreleased]
+
+{%- for type_, commits in ctx.history.unreleased | dictsort if type_ != "unknown" %}
+
+### {{ type_names.get(type_, "改进") }}
+
+{%- for commit in commits %}
+- {{ commit.descriptions[0] }}
+{%- endfor %}
+{%- endfor %}
+{%- endif %}
+
+{%- for release in ctx.history.released.values() %}
+
+## [{{ release.version.as_semver_tag() | replace("v", "", 1) }}] - {{ release.tagged_date.strftime("%Y-%m-%d") }}
+
+{%- for type_, commits in release["elements"] | dictsort if type_ != "unknown" %}
+
+### {{ type_names.get(type_, "改进") }}
+
+{%- for commit in commits %}
+- {{ commit.descriptions[0] }}
+{%- endfor %}
+{%- endfor %}
+{%- endfor %}
+{%- elif ctx.changelog_mode == "update" -%}
+{%- set prev = ctx.prev_changelog_file | read_file | safe -%}
+{%- set parts = prev.split(insertion_flag, maxsplit=1) -%}
+{%- if parts | length < 2 -%}
+{{ prev }}
+{%- else -%}
+{{ parts[0] | trim }}
+
+{{ insertion_flag }}
+{%- if ctx.history.unreleased | length > 0 %}
+
+## [Unreleased]
+
+{%- for type_, commits in ctx.history.unreleased | dictsort if type_ != "unknown" %}
+
+### {{ type_names.get(type_, "改进") }}
+
+{%- for commit in commits %}
+- {{ commit.descriptions[0] }}
+{%- endfor %}
+{%- endfor %}
+{%- endif %}
+{%- for release in ctx.history.released.values() %}
+{%- if ("## " ~ release.version.as_semver_tag() ~ " ") not in parts[1] %}
+
+## [{{ release.version.as_semver_tag() | replace("v", "", 1) }}] - {{ release.tagged_date.strftime("%Y-%m-%d") }}
+
+{%- for type_, commits in release["elements"] | dictsort if type_ != "unknown" %}
+
+### {{ type_names.get(type_, "改进") }}
+
+{%- for commit in commits %}
+- {{ commit.descriptions[0] }}
+{%- endfor %}
+{%- endfor %}
+{%- endif %}
+{%- endfor %}
+{{ parts[1] | trim }}
+{%- endif -%}
+{%- endif -%}
