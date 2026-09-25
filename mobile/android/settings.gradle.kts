@@ -23,4 +23,14 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.4.0" apply false
 }
 
+// 依赖仓库声明（原模板位于根 build.gradle 的 allprojects；根文件已简化为
+// 注释后仓库随之消失，统一收敛到 settings 的 dependencyResolutionManagement，
+// 这是 Gradle 9 的推荐方式）
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
 include(":app")
