@@ -64,6 +64,19 @@ jobs:
         run: flutter pub get
         working-directory: mobile
 
+      - name: 注入签名配置
+        if: "${{ secrets.ANDROID_KEYSTORE != '' }}"
+        working-directory: mobile/android
+        run: |
+          echo "test-inject"
+          echo "✅ 已注入签名配置"
+
+      - name: 回退 debug 签名提示
+        if: "${{ secrets.ANDROID_KEYSTORE == '' }}"
+        run: |
+          echo "test-fallback"
+          echo "ℹ️  未配置 ANDROID_KEYSTORE"
+
       - name: 构建 APK
         working-directory: mobile
         run: flutter build apk
