@@ -13,14 +13,14 @@
 4. 全部测试通过后打 tag（v<版本号>）并创建 GitHub Release
 """
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 # 兼容别名
 VERSION = __version__
 
 # 应用信息
 APP_NAME = "影视文件智能重命名工具"
-RELEASE_DATE = "2026-09-21"
+RELEASE_DATE = "2026-09-25"
 
 
 def get_version() -> str:

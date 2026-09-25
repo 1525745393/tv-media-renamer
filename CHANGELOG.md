@@ -11,7 +11,7 @@
 - **修复**（Fixed）：缺陷修复
 - **安全**（Security）：安全相关修复
 
-## [Unreleased]
+## [1.4.0] - 2026-09-25
 
 ### 新增
 - 版本管理与 Changelog 系统：`core/version.py` 作为版本号唯一来源，`CHANGELOG.md` 按 Keep a Changelog 标准维护
@@ -81,5 +81,6 @@
 
 ---
 
-[Unreleased]: https://github.com/1525745393/tv-media-renamer/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/1525745393/tv-media-renamer/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/1525745393/tv-media-renamer/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/1525745393/tv-media-renamer/releases/tag/v1.3

@@ -69,7 +69,7 @@ jobs:
       # 签名准备（配置 Secrets 时生效；未配置自动回退 debug）
       # -----------------------------------------------------------
       - name: 注入签名配置
-        if: ${{ secrets.ANDROID_KEYSTORE != '' }}
+        if: "${{ secrets.ANDROID_KEYSTORE != '' }}"
         working-directory: mobile/android
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 -d > app/tv-renamer.keystore
@@ -82,7 +82,7 @@ jobs:
           echo "✅ 已注入签名配置（release 签名构建）"
 
       - name: 回退 debug 签名提示
-        if: ${{ secrets.ANDROID_KEYSTORE == '' }}
+        if: "${{ secrets.ANDROID_KEYSTORE == '' }}"
         run: |
           echo "ℹ️  未配置 ANDROID_KEYSTORE，自动回退 debug 签名构建"
           echo "   如需 release 签名，请在 Settings → Secrets 配置："
