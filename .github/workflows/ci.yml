@@ -30,6 +30,7 @@ jobs:
         run: |
           pip install -r main/requirements.txt
           pip install -r requirements-dev.txt
+          pip install -r server/requirements.txt
 
       - name: 编译检查（全量字节码编译）
         working-directory: 电影电视剧重命名单文件版
