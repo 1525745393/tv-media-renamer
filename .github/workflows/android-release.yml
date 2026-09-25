@@ -64,18 +64,28 @@ jobs:
         run: flutter pub get
         working-directory: mobile
 
-      - name: 注入签名配置
-        if: ${{ secrets.ANDROID_KEYSTORE }}
+      - name: 注入签名配置（未配置 Secrets 时自动回退 debug 签名）
         working-directory: mobile/android
+        env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+          ANDROID_KEYSTORE_PWD: ${{ secrets.ANDROID_KEYSTORE_PWD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PWD: ${{ secrets.ANDROID_KEY_PWD }}
         run: |
-          echo "test-inject"
-          echo "✅ 已注入签名配置"
-
-      - name: 回退 debug 签名提示
-        if: "${{ !secrets.ANDROID_KEYSTORE }}"
-        run: |
-          echo "test-fallback"
-          echo "ℹ️  未配置 ANDROID_KEYSTORE"
+          if [ -n "${ANDROID_KEYSTORE}" ]; then
+            echo "${ANDROID_KEYSTORE}" | base64 -d > app/tv-renamer.keystore
+            {
+              echo "storeFile=app/tv-renamer.keystore"
+              echo "storePassword=${ANDROID_KEYSTORE_PWD}"
+              echo "keyAlias=${ANDROID_KEY_ALIAS}"
+              echo "keyPassword=${ANDROID_KEY_PWD}"
+            } > key.properties
+            echo "✅ 已注入签名配置（release 签名构建）"
+          else
+            echo "ℹ️  未配置 ANDROID_KEYSTORE，自动回退 debug 签名构建"
+            echo "   如需 release 签名，请在 Settings → Secrets 配置："
+            echo "   ANDROID_KEYSTORE / ANDROID_KEYSTORE_PWD / ANDROID_KEY_ALIAS / ANDROID_KEY_PWD"
+          fi
 
       - name: 构建 APK
         working-directory: mobile
