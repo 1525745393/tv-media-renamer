@@ -41,14 +41,18 @@ jobs:
           git config user.name "semantic-release"
           git config user.email "semantic-release"
           semantic-release version --no-vcs-release
-      - name: 同步 RELEASE_DATE（仅发版成功时）
+      - name: 同步 RELEASE_DATE 与移动端版本（仅发版成功时）
         if: steps.guard.outputs.skip == 'false'
         run: |
           if git log -1 --format='%an' | grep -qx "semantic-release"; then
             TODAY="$(date +%F)"
             sed -i "s/RELEASE_DATE = \".*\"/RELEASE_DATE = \"$TODAY\"/" 电影电视剧重命名单文件版/core/version.py
-            git add 电影电视剧重命名单文件版/core/version.py
-            git commit -m "chore(release): 同步 RELEASE_DATE 为 $TODAY"
+            NEW_VER="$(git describe --tags --abbrev=0 | sed 's/^v//')"
+            OLD_BUILD="$(grep '^version:' mobile/pubspec.yaml | sed -E 's/.*\+([0-9]+).*/\1/')"
+            NEW_BUILD="$((OLD_BUILD + 1))"
+            sed -i "s/^version: .*/version: ${NEW_VER}+${NEW_BUILD}/" mobile/pubspec.yaml
+            git add 电影电视剧重命名单文件版/core/version.py mobile/pubspec.yaml
+            git commit -m "chore(release): 同步 RELEASE_DATE 与移动端版本 ${NEW_VER}+${NEW_BUILD}"
             git push
           else
             echo "本次无版本发布，跳过"
