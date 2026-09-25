@@ -3,12 +3,16 @@ class MediaItem {
   MediaItem.fromJson(Map<String, dynamic> json)
       : name = json['name'] as String? ?? '',
         path = json['path'] as String? ?? '',
+        relPath = json['rel_path'] as String? ?? '',
         suggestedName = json['suggested_name'] as String? ?? '',
         size = json['size'] as int? ?? 0,
         analysis = (json['analysis'] as Map<String, dynamic>?) ?? {};
 
   final String name;
   final String path;
+
+  /// 相对路径（scan 根目录起），preview/rename 须用此定位子目录文件。
+  final String relPath;
   final String suggestedName;
   final int size;
   final Map<String, dynamic> analysis;

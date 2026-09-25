@@ -329,15 +329,15 @@ async function preview() {
   try {
     const data = await api.post("/api/rename-preview", {
       path: $("dir-path").value.trim(),
-      filenames: sel.map(i => i.name),
+      filenames: sel.map(i => i.rel_path || i.name),
     });
     const body = $("preview-body");
     body.innerHTML = "";
     (data.previews || []).forEach(p => {
       const d = document.createElement("div");
       d.className = "d";
-      const o = document.createElement("span"); o.className = "o"; o.textContent = p.old_name;
-      const n = document.createElement("span"); n.className = "n"; n.textContent = p.new_name;
+      const o = document.createElement("span"); o.className = "o"; o.textContent = p.old;
+      const n = document.createElement("span"); n.className = "n"; n.textContent = p.new || (p.error || "无法重命名");
       d.append(o, n);
       body.appendChild(d);
     });
@@ -354,7 +354,7 @@ $("dlg-apply").addEventListener("click", async () => {
   try {
     const data = await api.post("/api/rename", {
       path: $("dir-path").value.trim(),
-      renames: sel.map(i => ({ old: i.name, new: i.suggested_name })),
+      renames: sel.map(i => ({ old: i.rel_path || i.name, new: i.suggested_name })),
       dry_run: false,
     });
     const ok = (data.results || []).filter(r => r.ok).length;

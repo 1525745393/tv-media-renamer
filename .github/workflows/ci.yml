@@ -69,6 +69,7 @@ jobs:
         run: |
           python3 tests/test_media_renamer.py
           python3 tests/test_pattern_recognizer.py
+          python3 tests/test_remote_client.py
 
       - name: API 服务冒烟（鉴权 + 健康检查）
         working-directory: 电影电视剧重命名单文件版

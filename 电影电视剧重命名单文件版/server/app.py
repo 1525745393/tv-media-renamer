@@ -190,17 +190,18 @@ def rename_preview(req: RenamePreviewRequest) -> Dict[str, Any]:
 
     previews: List[Dict[str, Any]] = []
     for fn in req.filenames:
+        # fn 支持相对路径（scan 返回的 rel_path，如 "子目录/文件.mkv"）
         src = root / fn
-        if not src.exists():
+        if not src.exists() or not src.is_file():
             previews.append({"old": fn, "new": None, "ok": False, "error": "文件不存在"})
             continue
-        info = analyze_one(fn, str(root))
+        info = analyze_one(src.name, str(src.parent))
         new_name = info["suggested_name"]
-        if new_name == fn:
-            previews.append({"old": fn, "new": fn, "ok": True, "unchanged": True,
+        if new_name == src.name:
+            previews.append({"old": fn, "new": src.name, "ok": True, "unchanged": True,
                              "analysis": info})
         else:
-            dst = root / new_name
+            dst = src.parent / new_name   # 目标与源文件同目录
             conflict = dst.exists() and dst != src
             previews.append({"old": fn, "new": new_name, "ok": not conflict,
                              "conflict": conflict, "analysis": info})
@@ -219,7 +220,7 @@ def rename(req: RenameRequest) -> Dict[str, Any]:
     for item in req.renames[:500]:
         old, new = item.get("old", ""), item.get("new", "")
         src = root / old
-        dst = root / new
+        dst = src.parent / new if new else src  # 目标与源文件同目录
         if not src.exists():
             results.append({"old": old, "new": new, "ok": False, "error": "源文件不存在"})
             continue

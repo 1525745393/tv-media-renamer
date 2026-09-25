@@ -235,6 +235,15 @@ class RenameUI(QWidget):
         version_label = QLabel("v1.3")
         version_label.setStyleSheet("font-size: 12px; color: #95a5a6; padding: 5px 10px; background-color: #ecf0f1; border-radius: 10px;")
         title_layout.addWidget(version_label)
+
+        # NAS 服务（远程模式）入口
+        self.remote_btn = QPushButton("🌐 NAS 服务")
+        self.remote_btn.setToolTip("连接 NAS 上的重命名服务（远程模式）")
+        self.remote_btn.setStyleSheet(
+            "QPushButton { font-size: 13px; color: white; background-color: #2c3e50;"
+            " border-radius: 10px; padding: 5px 14px; }"
+            "QPushButton:hover { background-color: #34495e; }")
+        title_layout.addWidget(self.remote_btn)
         
         main_layout.addLayout(title_layout)
         
@@ -350,9 +359,17 @@ class RenameUI(QWidget):
         
         # 模式切换
         self.control_panel.radio_rename.toggled.connect(self.on_mode_changed)
-        
+
+        # NAS 服务（远程模式）
+        self.remote_btn.clicked.connect(self.open_remote_mode)
+
         # 添加快捷键支持
         self.setup_shortcuts()
+
+    def open_remote_mode(self) -> None:
+        """打开 NAS 服务远程模式对话框。"""
+        from ui.remote_mode import RemoteModeDialog
+        RemoteModeDialog(self).exec_()
         
     def setup_styles(self) -> str:
         """设置样式"""

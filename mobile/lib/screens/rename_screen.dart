@@ -22,7 +22,8 @@ class RenameScreen extends StatefulWidget {
 
 class _RenameScreenState extends State<RenameScreen> {
   late final Map<String, String> _newNames = {
-    for (final f in widget.items) f.name: f.suggestedName,
+    for (final f in widget.items)
+      (f.relPath.isNotEmpty ? f.relPath : f.name): f.suggestedName,
   };
   bool _executing = false;
   String? _resultMessage;
@@ -67,7 +68,8 @@ class _RenameScreenState extends State<RenameScreen> {
               itemCount: widget.items.length,
               itemBuilder: (context, i) {
                 final f = widget.items[i];
-                final newName = _newNames[f.name] ?? f.suggestedName;
+                final key = f.relPath.isNotEmpty ? f.relPath : f.name;
+                final newName = _newNames[key] ?? f.suggestedName;
                 final isSame = f.name == newName;
                 return ListTile(
                   leading: isSame

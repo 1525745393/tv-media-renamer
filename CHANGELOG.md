@@ -21,6 +21,9 @@
 - NAS 一键部署（`docker-compose.yml` + `server/.env.example` + `deploy.sh`）：群晖 `./deploy.sh` 拉起服务，支持 API_TOKEN/MEDIA_DIR/PORT/ALLOWED_ROOT 配置、健康检查、开机自启
 - Android 发布签名自动配置（`build.gradle.kts`）：检测 `android/key.properties` 即用正式签名，否则回退 debug 签名，附 keytool 生成与配置说明
 - PWA 网页控制台（`server/static/`）：手机/电脑浏览器直接访问 `http://<NAS-IP>:8123/` 即可登录、扫描、预览、一键重命名；含 manifest + Service Worker（可添加到主屏幕、离线打开），已用真实浏览器端到端验证
+- 桌面版 GUI 接入 NAS 服务（`ui/remote_mode.py`）：主窗口新增「NAS 服务」按钮，打开远程模式对话框（连接 Token → 扫描 → 全选/筛选 → 预览 → 执行，后台线程不卡 UI）；服务端与客户端统一支持 `rel_path` 定位子目录文件，目标名落回源文件同目录
+- 修复：递归扫描的子目录文件此前无法通过 preview/rename 定位（纯文件名找不到），现已全链路（server/PWA/桌面/Flutter）统一使用 `rel_path`
+- 新增 `tests/test_remote_client.py`：远程 API 客户端单元测试（鉴权头/中文路径编码/POST 体/错误透传），纳入 CI
 - 发布前自动验证脚本 `scripts/check_release.py`（版本一致性 / CHANGELOG 完整性 / 可选测试回归）
 - GitHub Actions CI：push/PR 自动运行全功能测试与核心引擎测试
 - MIT License
