@@ -15,6 +15,8 @@
 
 ### 新增
 - 版本管理与 Changelog 系统：`core/version.py` 作为版本号唯一来源，`CHANGELOG.md` 按 Keep a Changelog 标准维护
+- NAS API 服务（`server/`）：FastAPI 包装解析引擎为 HTTP 服务，支持鉴权（Bearer Token）、目录扫描、批量解析、重命名预览与执行（自动备份），路径穿越防护，提供 Dockerfile 供群晖部署
+- 移动端 Flutter 骨架（`mobile/`）：NAS 地址+Token 登录、目录扫描、重命名预览/执行全流程客户端（本机无 Flutter SDK，待构建验证）
 - 发布前自动验证脚本 `scripts/check_release.py`（版本一致性 / CHANGELOG 完整性 / 可选测试回归）
 - GitHub Actions CI：push/PR 自动运行全功能测试与核心引擎测试
 - MIT License
