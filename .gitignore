@@ -33,3 +33,6 @@ server/.env
 *.jks
 *.keystore
 key.properties
+
+# Android 签名资产（严禁提交）
+android-signing/
