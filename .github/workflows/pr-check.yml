@@ -1,0 +1,45 @@
+# ===========================================================
+# PR 标题规范检查（借鉴 EmbyTok-Flutter pr-check.yml）
+#
+# 检查 PR 标题是否符合 Conventional Commits 规范，与
+# scripts/check_release.py 的版本管理配合：
+#   feat: 新功能     fix: 修复     docs: 文档
+#   style/refactor/perf/test/build/ci/chore/revert: 其他
+#
+# 示例：
+#   ✓ feat: 增加远程模式
+#   ✓ fix: 修复子目录文件重命名
+#   ✗ 随便改一下（不通过）
+# ===========================================================
+
+name: PR Lint
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lint:
+    name: PR 标题规范检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert

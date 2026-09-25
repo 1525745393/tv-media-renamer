@@ -1,0 +1,104 @@
+# ===========================================================
+# Docker Release 工作流（借鉴 EmbyTok-Flutter docker-release.yml）
+#
+# 与 EmbyTok 的差异：
+#   - 镜像推送到 GitHub Container Registry（GHCR），
+#     使用内置 GITHUB_TOKEN 即可，无需额外 Docker Secrets
+#   - 多架构构建 linux/amd64 + linux/arm64（群晖常见 arm64）
+#
+# 触发条件：
+#   1. push v* 标签
+#   2. workflow_dispatch（手动指定 tag，默认 latest）
+#
+# 群晖部署（示例）：
+#   docker pull ghcr.io/1525745393/tv-renamer-server:<tag>
+#   docker run -d -p 8123:8123 \
+#     -e API_TOKEN=<token> -e ALLOWED_ROOT=/media \
+#     -v /volume1/media:/media:rw \
+#     --name tv-renamer-api ghcr.io/1525745393/tv-renamer-server:<tag>
+#
+# 注意：GHCR 包默认私有，首次推送后请在
+#   https://github.com/settings/packages 将包设为 Public，
+#   群晖才能免登录拉取。
+# ===========================================================
+
+name: Docker Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "镜像标签（默认使用 git tag 或 latest）"
+        required: false
+        default: "latest"
+        type: string
+
+concurrency:
+  group: docker-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: 构建并推送多架构镜像
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # -----------------------------------------------------------
+      # 解析镜像标签与元数据
+      # -----------------------------------------------------------
+      - name: 解析镜像标签与元数据
+        id: meta
+        run: |
+          VERSION="${{ github.event.inputs.tag || github.ref_name || 'latest' }}"
+          if [[ "$VERSION" == refs/tags/* ]]; then
+            VERSION="${VERSION#refs/tags/}"
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "✅ 版本标签: ${VERSION}"
+          echo "✅ 镜像仓库: ghcr.io/${{ github.repository_owner }}"
+          echo "✅ 平台: linux/amd64, linux/arm64"
+
+      - name: 登录 GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 构建并推送 NAS API 服务镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: 电影电视剧重命名单文件版/
+          file: 电影电视剧重命名单文件版/server/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/tv-renamer-server:${{ steps.meta.outputs.VERSION }}
+            ghcr.io/${{ github.repository_owner }}/tv-renamer-server:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 显示镜像摘要
+        run: |
+          echo "============================================"
+          echo "镜像构建与推送完成"
+          echo "============================================"
+          echo "  ghcr.io/${{ github.repository_owner }}/tv-renamer-server:${{ steps.meta.outputs.VERSION }}"
+          echo "  ghcr.io/${{ github.repository_owner }}/tv-renamer-server:latest"
+          echo ""
+          echo "部署到群晖: docker pull 上述镜像后 docker run（见文件头注释）"
+          echo "首次推送后请到 https://github.com/settings/packages 将包设为 Public"

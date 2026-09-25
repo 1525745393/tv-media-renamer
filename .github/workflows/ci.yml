@@ -6,8 +6,16 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  # ===========================================================
+  # Python 桌面版 + API 服务测试
+  # ===========================================================
+  python-test:
+    name: Python 桌面版 & API 测试
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -86,3 +94,75 @@ jobs:
       - name: 版本与 Changelog 校验
         working-directory: 电影电视剧重命名单文件版
         run: python3 scripts/check_release.py
+
+  # ===========================================================
+  # Flutter 移动端验证（借鉴 EmbyTok-Flutter ci.yml）
+  # 分析只以 error 级别阻断；构建 debug APK 验证 Android 链路
+  # ===========================================================
+  flutter-test:
+    name: Flutter 移动端分析 & 构建
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: "3.44.8"
+          cache: true
+
+      - name: 安装依赖
+        run: flutter pub get
+        working-directory: mobile
+
+      - name: 代码分析（只以 error 阻断）
+        working-directory: mobile
+        run: |
+          set +e
+          flutter analyze --no-pub > /tmp/analyze.txt 2>&1
+          set -e
+          ERROR_COUNT=$(grep -c "^   error •" /tmp/analyze.txt || true)
+          echo "📊 error: $ERROR_COUNT, warning: $(grep -c '^   warning •' /tmp/analyze.txt || true), info: $(grep -c '^   info •' /tmp/analyze.txt || true)"
+          if [ "$ERROR_COUNT" -gt 0 ]; then
+            echo "❌ 发现 error 级别问题："
+            grep "^   error •" /tmp/analyze.txt
+            exit 1
+          fi
+          echo "✅ 无 error 级别问题"
+
+      - name: 运行单元测试（无测试文件则跳过）
+        working-directory: mobile
+        run: |
+          if [ -d test ] && ls test/*.dart >/dev/null 2>&1; then
+            flutter test
+          else
+            echo "ℹ️  暂无测试文件，跳过 flutter test"
+          fi
+
+      - name: 构建 Debug APK（验证 Android 构建链路）
+        working-directory: mobile
+        run: flutter build apk --debug
+
+      - name: 上传 Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-debug-apk
+          path: mobile/build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+
+  # ===========================================================
+  # Docker 镜像构建验证（借鉴 EmbyTok ci.yml docker-build）
+  # ===========================================================
+  docker-build:
+    name: Docker 镜像构建验证
+    runs-on: ubuntu-latest
+    needs: [python-test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 构建 NAS API 服务镜像
+        run: docker build -f 电影电视剧重命名单文件版/server/Dockerfile -t tv-renamer-api:ci-test 电影电视剧重命名单文件版/
+
+      - name: 验证镜像存在
+        run: docker images tv-renamer-api:ci-test

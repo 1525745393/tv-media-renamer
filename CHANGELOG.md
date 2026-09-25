@@ -24,6 +24,12 @@
 - 桌面版 GUI 接入 NAS 服务（`ui/remote_mode.py`）：主窗口新增「NAS 服务」按钮，打开远程模式对话框（连接 Token → 扫描 → 全选/筛选 → 预览 → 执行，后台线程不卡 UI）；服务端与客户端统一支持 `rel_path` 定位子目录文件，目标名落回源文件同目录
 - 修复：递归扫描的子目录文件此前无法通过 preview/rename 定位（纯文件名找不到），现已全链路（server/PWA/桌面/Flutter）统一使用 `rel_path`
 - 新增 `tests/test_remote_client.py`：远程 API 客户端单元测试（鉴权头/中文路径编码/POST 体/错误透传），纳入 CI
+- 工作流全面升级（借鉴 EmbyTok-Flutter 的 CI/Release 体系）：
+  - CI 增加并发取消、Flutter 移动端验证 job（analyze 只 error 阻断 + 构建 debug APK 上传）、Docker 镜像构建验证
+  - 新增 `android-release.yml`：推送 v* 标签自动构建 APK（配置签名 Secrets 则 release 签名，否则 debug 回退）
+  - 新增 `docker-release.yml`：推送 v* 标签构建多架构（amd64/arm64）镜像到 GHCR，群晖可一键拉取部署
+  - 新增 `pr-check.yml`：PR 标题 Conventional Commits 规范检查
+  - 新增 `secrets-check.yml`：手动检查 Android 签名 Secrets 配置状态
 - 发布前自动验证脚本 `scripts/check_release.py`（版本一致性 / CHANGELOG 完整性 / 可选测试回归）
 - GitHub Actions CI：push/PR 自动运行全功能测试与核心引擎测试
 - MIT License
