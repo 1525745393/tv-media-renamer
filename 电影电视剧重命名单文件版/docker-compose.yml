@@ -1,0 +1,33 @@
+# 影视文件智能重命名工具 - NAS 端一键部署
+# 用法：
+#   1. 复制 .env.example 为 .env 并填写 API_TOKEN、MEDIA_DIR
+#   2. docker compose up -d --build
+services:
+  tv-renamer-api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: tv-renamer-api:latest
+    container_name: tv-renamer-api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8123}:8123"
+    environment:
+      # 必填：鉴权 Token（.env 中设置，未设置则启动报错）
+      API_TOKEN: ${API_TOKEN:?请先在 .env 中设置 API_TOKEN}
+      # 允许操作的根目录（容器内路径，防目录穿越）
+      ALLOWED_ROOT: ${ALLOWED_ROOT:-/media}
+      PORT: "8123"
+    volumes:
+      # 媒体目录挂载（宿主机路径由 MEDIA_DIR 指定，默认 /volume1/media）
+      - ${MEDIA_DIR:-/volume1/media}:/media:rw
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os,urllib.request;urllib.request.urlopen('http://127.0.0.1:8123/api/health', headers={'Authorization':'Bearer '+os.environ['API_TOKEN']})"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

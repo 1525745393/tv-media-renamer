@@ -28,10 +28,21 @@ flutter build apk --release          # 生成 build/app/outputs/flutter-apk/app-
 flutter build appbundle --release    # 上架 Google Play 用 AAB
 ```
 
-**发布签名**（首次上架前必做）：`android/key.properties` 已被 gitignore，
-用 `keytool` 生成签名 keystore 后填写到 `android/key.properties`，
-并在 `android/app/build.gradle.kts` 的 `buildTypes.release` 中配置正式签名
-（当前 release 构建暂用 debug 签名，仅适合自用分发）。
+**发布签名**：`build.gradle.kts` 已内置自动检测——检测到 `android/key.properties` 即用正式签名，否则回退 debug 签名（自用分发可直接打包）。首次上架前：
+
+```bash
+# 1. 生成签名（只需一次）
+keytool -genkey -v -keystore android/key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias release
+
+# 2. 创建 android/key.properties（勿提交，已 gitignore）
+#    storeFile=key.jks
+#    storePassword=<密码>
+#    keyAlias=release
+#    keyPassword=<密码>
+
+# 3. 重新打包即使用正式签名
+flutter build appbundle --release
+```
 
 ### iOS 打包
 

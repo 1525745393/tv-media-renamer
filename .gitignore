@@ -26,3 +26,10 @@ Thumbs.db
 .vscode/
 *.swp
 *.spec
+
+# ===== 部署密钥与凭据（勿提交） =====
+.env
+server/.env
+*.jks
+*.keystore
+key.properties

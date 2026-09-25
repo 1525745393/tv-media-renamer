@@ -15,7 +15,17 @@ python3 server/app.py                  # 默认 8123 端口
 
 启动后访问 `http://127.0.0.1:8123/docs` 查看交互式 API 文档。
 
-## 群晖 NAS 部署（Docker）
+## 群晖 NAS 部署（推荐：Docker Compose 一键）
+
+```bash
+cd 电影电视剧重命名单文件版
+cp server/.env.example .env   # 编辑填写 API_TOKEN（生成：python3 -c "import secrets; print(secrets.token_urlsafe(32))"）
+./deploy.sh                   # 或手动：docker compose up -d --build
+```
+
+`.env` 配置项：`API_TOKEN`（必填）、`MEDIA_DIR`（媒体目录，默认 `/volume1/media`）、`PORT`、`ALLOWED_ROOT`。服务含健康检查与开机自启（restart: unless-stopped）。
+
+### 备选：直接 Docker 构建运行
 
 ```bash
 cd 电影电视剧重命名单文件版
