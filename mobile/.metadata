@@ -1,0 +1,31 @@
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool to assess capabilities and perform upgrades etc.
+#
+# Top level metadata is required as a format identifier.
+version: 1
+migration:
+  platforms:
+    - platform: root
+      create_revision: 0000000000000000000000000000000000000000
+      base_revision: 0000000000000000000000000000000000000000
+    - platform: android
+      create_revision: 0000000000000000000000000000000000000000
+      base_revision: 0000000000000000000000000000000000000000
+    - platform: ios
+      create_revision: 0000000000000000000000000000000000000000
+      base_revision: 0000000000000000000000000000000000000000000
+
+  # Not supported for this project.
+  # cupertino_extra: false
+
+  # Not supported for this project.
+  # web: false
+
+  # Not supported for this project.
+  # windows: false
+
+  # Not supported for this project.
+  # linux: false
+
+  # Not supported for this project.
+  # macos: false
