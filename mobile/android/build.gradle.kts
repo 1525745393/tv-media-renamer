@@ -1,12 +1,9 @@
-// Flutter 官方模板根 build 文件。
-// ① 依赖仓库：google() + mavenCentral()（flutter gradle 插件会在
-//    项目级注入 download.flutter.io，allprojects 声明与之兼容；
-//    不要改用 settings 的 dependencyResolutionManagement，实测冲突）
-// ② buildDir="../build"：flutter 工具按 mobile/build/... 查找 APK，
-//    缺失会导致 "Gradle build failed to produce an .apk file"
-// ③ 本文件同时让 flutter 工具识别 android 工程为 Gradle 工程并
-//    正确定位 app/src/main/AndroidManifest.xml（无此文件会被误判
-//    为已删除的 v1 embedding）
+// 根 build 文件（Flutter 3.44.8 官方模板原文）。
+// 作用：① 依赖仓库 google/mavenCentral（flutter gradle 插件在
+// 项目级注入 download.flutter.io，allprojects 声明与之兼容）；
+// ② build 目录指到 mobile/build，flutter 工具按该路径查找 APK；
+// ③ 让 flutter 工具识别为 Gradle 工程并正确定位
+//    app/src/main/AndroidManifest.xml（缺失会被误判为 v1 embedding）。
 allprojects {
     repositories {
         google()
@@ -14,14 +11,20 @@ allprojects {
     }
 }
 
-rootProject.buildDir = File("../build")
+val newBuildDir: Directory =
+    rootProject.layout.buildDirectory
+        .dir("../../build")
+        .get()
+rootProject.layout.buildDirectory.value(newBuildDir)
+
 subprojects {
-    project.buildDir = File("${rootProject.buildDir}/${project.name}")
+    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
+    project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
     project.evaluationDependsOn(":app")
 }
 
-tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+tasks.register<Delete>("clean") {
+    delete(rootProject.layout.buildDirectory)
 }
