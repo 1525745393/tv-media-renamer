@@ -53,6 +53,18 @@ docker run -d -p 8123:8123 \
 
 **鉴权**：所有请求携带 `Authorization: Bearer <API_TOKEN>`。
 
+## 网页控制台（PWA，无需安装 App）
+
+服务启动后直接访问 **`http://<NAS-IP>:8123/`** 即打开手机/电脑均可用的网页控制台：
+
+- **登录**：输入 API Token（同源访问可留空服务器地址）
+- **扫描**：输入媒体目录，列出文件与解析建议（类型徽章 + 需改名高亮）
+- **重命名**：勾选/全选/仅需改名筛选 → 预览 → 确认执行（原文件自动备份）
+- **PWA**：支持添加到主屏幕（manifest + Service Worker），可离线打开外壳
+
+对应文件：`server/static/index.html`（单页应用）、`manifest.webmanifest`、`sw.js`、`icons/`。
+手机浏览器打开后选择"添加到主屏幕"即可像原生 App 一样使用，无需 Flutter 编译环境。
+
 **安全设计**：
 - 路径校验：任何目录操作都被限制在 `ALLOWED_ROOT` 内（防目录穿越）
 - 重命名默认预览模式（dry_run），实际执行才落盘

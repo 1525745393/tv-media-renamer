@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#37474f">
+<title>影视重命名助手</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --primary: #37474f;
+    --accent: #ef6c00;
+    --ok: #2e7d32;
+    --err: #c62828;
+    --muted: #78909c;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: #263238;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  header {
+    background: linear-gradient(135deg, #37474f, #455a64);
+    color: #fff;
+    padding: 16px 16px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 17px; font-weight: 600; flex: 1; }
+  header .conn { font-size: 11px; opacity: .85; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  main { max-width: 720px; margin: 0 auto; padding: 14px 14px 90px; }
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    padding: 16px; margin-bottom: 14px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  input {
+    width: 100%; padding: 12px 14px; border: 1px solid #cfd8dc;
+    border-radius: 10px; font-size: 15px; background: #fff; outline: none;
+  }
+  input:focus { border-color: var(--primary); }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row input { flex: 1; }
+  button {
+    border: none; border-radius: 10px; padding: 12px 18px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity .15s;
+  }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-ghost { background: #eceff1; color: #455a64; }
+  .btn-block { width: 100%; }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 10px; }
+  .toolbar button { flex: 1; padding: 10px 8px; font-size: 14px; }
+  .status { font-size: 13px; color: var(--muted); padding: 4px 2px 10px; }
+  .status.err { color: var(--err); }
+  ul.items { list-style: none; }
+  li.item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 4px;
+    border-bottom: 1px solid #eceff1;
+  }
+  li.item:last-child { border-bottom: none; }
+  li.item input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--primary); flex: none; }
+  .item-body { flex: 1; min-width: 0; }
+  .item-name { font-size: 14px; word-break: break-all; }
+  .item-sub { font-size: 12px; margin-top: 2px; word-break: break-all; }
+  .item-sub.need { color: var(--accent); }
+  .item-sub.ok { color: var(--ok); }
+  .badge {
+    font-size: 10px; padding: 2px 6px; border-radius: 6px; color: #fff; flex: none;
+  }
+  .badge.tv { background: #455a64; }
+  .badge.movie { background: #ef6c00; }
+  .badge.special { background: #6a1b9a; }
+  .badge.unknown { background: #b0bec5; }
+  .bottom-bar {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: var(--card); box-shadow: 0 -2px 8px rgba(0,0,0,.08);
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    max-width: 720px; margin: 0 auto;
+  }
+  .bottom-bar .row { gap: 10px; }
+  #login-view .card:first-child { margin-top: 40px; text-align: center; }
+  #login-view .logo { font-size: 44px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .counts { font-size: 13px; color: var(--muted); }
+  .hidden { display: none !important; }
+  dialog {
+    border: none; border-radius: var(--radius); padding: 0; width: min(92vw, 560px);
+    box-shadow: 0 8px 30px rgba(0,0,0,.2);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  .dlg-head { padding: 14px 16px; font-weight: 600; border-bottom: 1px solid #eceff1; }
+  .dlg-body { padding: 12px 16px; max-height: 60vh; overflow: auto; font-size: 13px; }
+  .dlg-body .d { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #eceff1; }
+  .dlg-body .d .o { flex: 1; min-width: 0; word-break: break-all; color: #607d8b; text-decoration: line-through; }
+  .dlg-body .d .n { flex: 1; min-width: 0; word-break: break-all; color: var(--ok); }
+  .dlg-ft { padding: 10px 16px; display: flex; gap: 10px; justify-content: flex-end; }
+  .toast {
+    position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+    background: #263238; color: #fff; padding: 10px 18px; border-radius: 20px;
+    font-size: 13px; z-index: 50; opacity: 0; transition: opacity .2s; max-width: 88vw;
+  }
+  .toast.show { opacity: 1; }
+  .toast.err { background: var(--err); }
+  .toast.ok { background: var(--ok); }
+</style>
+</head>
+<body>
+
+<header id="app-header" class="hidden">
+  <h1>🎬 影视重命名助手</h1>
+  <div class="conn" id="conn-label"></div>
+</header>
+
+<main>
+  <!-- 登录视图 -->
+  <section id="login-view">
+    <div class="card">
+      <div class="logo">🎬</div>
+      <h2 style="font-size:20px;margin:8px 0 4px;">影视重命名助手</h2>
+      <p class="hint">连接 NAS 上的重命名服务，浏览目录、预览建议名、一键重命名（自动备份）。</p>
+    </div>
+    <div class="card">
+      <label>服务器地址（默认当前地址）</label>
+      <input id="server-url" placeholder="http://192.168.1.100:8123">
+      <div style="height:12px"></div>
+      <label>API Token</label>
+      <input id="api-token" type="password" placeholder="服务端设置的 API_TOKEN">
+      <div style="height:14px"></div>
+      <button class="btn-primary btn-block" id="btn-login">连接</button>
+      <p class="status err hidden" id="login-err"></p>
+    </div>
+  </section>
+
+  <!-- 扫描视图 -->
+  <section id="scan-view" class="hidden">
+    <div class="card">
+      <div class="row">
+        <input id="dir-path" placeholder="NAS 媒体目录，如 /media/视频">
+        <button class="btn-primary" id="btn-scan">扫描</button>
+      </div>
+      <p class="status" id="scan-status">输入目录后点击扫描</p>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn-ghost" id="btn-select-all">全选</button>
+        <button class="btn-ghost" id="btn-clear-all">清空</button>
+        <button class="btn-ghost" id="btn-filter">仅需改名</button>
+      </div>
+      <p class="counts" id="scan-counts"></p>
+      <ul class="items" id="file-list"></ul>
+    </div>
+  </section>
+</main>
+
+<div class="bottom-bar hidden" id="bottom-bar">
+  <div class="row">
+    <button class="btn-accent" id="btn-rename" disabled>重命名选中（0）</button>
+  </div>
+</div>
+
+<dialog id="preview-dlg">
+  <div class="dlg-head">重命名预览</div>
+  <div class="dlg-body" id="preview-body"></div>
+  <div class="dlg-ft">
+    <button class="btn-ghost" id="dlg-cancel">返回</button>
+    <button class="btn-accent" id="dlg-apply">确认执行</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+// 注册 Service Worker（PWA：可离线打开、添加到主屏幕）
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+const $ = id => document.getElementById(id);
+const api = {
+  base: location.origin,
+  token: "",
+  headers() { return { "Authorization": "Bearer " + this.token, "Content-Type": "application/json" }; },
+  async get(path, params) {
+    const q = params ? "?" + new URLSearchParams(params).toString() : "";
+    const r = await fetch(this.base + path + q, { headers: this.headers() });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || ("HTTP " + r.status));
+    return r.json();
+  },
+  async post(path, body) {
+    const r = await fetch(this.base + path, { method: "POST", headers: this.headers(), body: JSON.stringify(body) });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || ("HTTP " + r.status));
+    return r.json();
+  },
+};
+
+let items = [];
+let onlyChanged = false;
+
+function toast(msg, kind) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (kind ? " " + kind : "");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.className = "toast", 2200);
+}
+
+/* ---------- 登录 ---------- */
+async function init() {
+  const saved = JSON.parse(localStorage.getItem("tv_renamer_conn") || "{}");
+  if (saved.base) $("server-url").value = saved.base;
+  if (saved.token) $("token-prefill") || ($("api-token").value = saved.token);
+}
+init();
+
+$("btn-login").addEventListener("click", async () => {
+  const base = ($("server-url").value.trim() || location.origin).replace(/\/+$/, "");
+  const token = $("api-token").value.trim();
+  if (!token) return showLoginErr("请填写 API Token");
+  api.base = base; api.token = token;
+  try {
+    const h = await api.get("/api/health");
+    localStorage.setItem("tv_renamer_conn", JSON.stringify({ base, token }));
+    $("conn-label").textContent = base;
+    $("login-view").classList.add("hidden");
+    $("scan-view").classList.remove("hidden");
+    $("app-header").classList.remove("hidden");
+    $("bottom-bar").classList.remove("hidden");
+    toast("已连接 " + (h.app || "服务") + " v" + (h.version || ""));
+  } catch (e) {
+    showLoginErr(e.message.includes("401") ? "Token 无效或服务器配置错误" : "无法连接：" + e.message);
+  }
+});
+function showLoginErr(msg) {
+  const el = $("login-err");
+  el.textContent = msg;
+  el.classList.remove("hidden");
+}
+
+/* ---------- 扫描 ---------- */
+$("btn-scan").addEventListener("click", scan);
+$("dir-path").addEventListener("keydown", e => { if (e.key === "Enter") scan(); });
+
+async function scan() {
+  const path = $("dir-path").value.trim();
+  if (!path) { $("scan-status").textContent = "请先输入目录"; return; }
+  $("scan-status").textContent = "扫描中…";
+  try {
+    const data = await api.get("/api/scan", { path, recursive: "true" });
+    items = data.files || [];
+    $("scan-status").textContent = "找到 " + data.total + " 个媒体文件";
+    renderList();
+  } catch (e) {
+    $("scan-status").textContent = "扫描失败：" + e.message;
+    $("scan-status").classList.add("err");
+  }
+}
+
+function renderList() {
+  const need = items.filter(i => i.name !== i.suggested_name).length;
+  $("scan-counts").textContent = "共 " + items.length + " 项，其中 " + need + " 项建议改名";
+  const ul = $("file-list");
+  ul.innerHTML = "";
+  items.forEach((it, idx) => {
+    if (onlyChanged && it.name === it.suggested_name) return;
+    const li = document.createElement("li");
+    li.className = "item";
+    const cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = !!it.checked; cb.dataset.idx = idx;
+    cb.addEventListener("change", () => { it.checked = cb.checked; updateBar(); });
+    const body = document.createElement("div");
+    body.className = "item-body";
+    const name = document.createElement("div");
+    name.className = "item-name"; name.textContent = it.name;
+    const sub = document.createElement("div");
+    const needName = it.name !== it.suggested_name;
+    sub.className = "item-sub " + (needName ? "need" : "ok");
+    sub.textContent = needName ? "建议： " + it.suggested_name : "名称已规范";
+    body.append(name, sub);
+    const badge = document.createElement("span");
+    badge.className = "badge " + (it.analysis && it.analysis.type || "unknown");
+    badge.textContent = it.analysis && it.analysis.type || "?";
+    li.append(cb, body, badge);
+    ul.appendChild(li);
+  });
+  updateBar();
+}
+
+function selected() { return items.filter(i => i.checked); }
+function updateBar() {
+  const n = selected().length;
+  $("btn-rename").textContent = "重命名选中（" + n + "）";
+  $("btn-rename").disabled = n === 0;
+}
+
+$("btn-select-all").addEventListener("click", () => {
+  items.forEach(i => { if (!onlyChanged || i.name !== i.suggested_name) i.checked = true; });
+  renderList();
+});
+$("btn-clear-all").addEventListener("click", () => {
+  items.forEach(i => i.checked = false);
+  renderList();
+});
+$("btn-filter").addEventListener("click", () => {
+  onlyChanged = !onlyChanged;
+  $("btn-filter").style.opacity = onlyChanged ? "1" : ".6";
+  renderList();
+});
+
+/* ---------- 重命名 ---------- */
+$("btn-rename").addEventListener("click", preview);
+
+async function preview() {
+  const sel = selected();
+  if (!sel.length) return;
+  try {
+    const data = await api.post("/api/rename-preview", {
+      path: $("dir-path").value.trim(),
+      filenames: sel.map(i => i.name),
+    });
+    const body = $("preview-body");
+    body.innerHTML = "";
+    (data.previews || []).forEach(p => {
+      const d = document.createElement("div");
+      d.className = "d";
+      const o = document.createElement("span"); o.className = "o"; o.textContent = p.old_name;
+      const n = document.createElement("span"); n.className = "n"; n.textContent = p.new_name;
+      d.append(o, n);
+      body.appendChild(d);
+    });
+    $("preview-dlg").showModal();
+  } catch (e) {
+    toast("预览失败：" + e.message, "err");
+  }
+}
+
+$("dlg-cancel").addEventListener("click", () => $("preview-dlg").close());
+$("dlg-apply").addEventListener("click", async () => {
+  const sel = selected();
+  $("dlg-apply").disabled = true;
+  try {
+    const data = await api.post("/api/rename", {
+      path: $("dir-path").value.trim(),
+      renames: sel.map(i => ({ old: i.name, new: i.suggested_name })),
+      dry_run: false,
+    });
+    const ok = (data.results || []).filter(r => r.ok).length;
+    toast("执行完成：" + ok + "/" + (data.results || []).length + " 成功（原文件已备份）", "ok");
+    $("preview-dlg").close();
+    scan(); // 刷新列表
+  } catch (e) {
+    toast("执行失败：" + e.message, "err");
+  } finally {
+    $("dlg-apply").disabled = false;
+  }
+});
+</script>
+</body>
+</html>

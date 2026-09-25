@@ -20,6 +20,7 @@
 - 移动端构建工程（`mobile/android/` + `mobile/ios/`）：按 Flutter stable 官方模板生成（Gradle 9.3.1 / AGP 9.1.0 / Kotlin 2.4.0），含 Android 五档图标与 iOS AppIcon 全套、启动屏、签名与打包说明（本机无 Flutter SDK，待构建验证）
 - NAS 一键部署（`docker-compose.yml` + `server/.env.example` + `deploy.sh`）：群晖 `./deploy.sh` 拉起服务，支持 API_TOKEN/MEDIA_DIR/PORT/ALLOWED_ROOT 配置、健康检查、开机自启
 - Android 发布签名自动配置（`build.gradle.kts`）：检测 `android/key.properties` 即用正式签名，否则回退 debug 签名，附 keytool 生成与配置说明
+- PWA 网页控制台（`server/static/`）：手机/电脑浏览器直接访问 `http://<NAS-IP>:8123/` 即可登录、扫描、预览、一键重命名；含 manifest + Service Worker（可添加到主屏幕、离线打开），已用真实浏览器端到端验证
 - 发布前自动验证脚本 `scripts/check_release.py`（版本一致性 / CHANGELOG 完整性 / 可选测试回归）
 - GitHub Actions CI：push/PR 自动运行全功能测试与核心引擎测试
 - MIT License

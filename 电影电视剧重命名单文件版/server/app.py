@@ -253,6 +253,16 @@ async def unhandled_exception(request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"detail": f"服务器错误: {exc}"})
 
 
+# ============ 网页控制台（PWA）============
+# 挂载必须放在所有 API 路由注册之后（FastAPI 按注册顺序匹配，/api/* 优先）。
+from fastapi.staticfiles import StaticFiles  # noqa: E402
+
+_STATIC_DIR = pathlib.Path(__file__).resolve().parent / "static"
+if _STATIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(_STATIC_DIR), html=True), name="web-console")
+    logger.info("网页控制台已挂载: %s", _STATIC_DIR)
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", "8123"))
