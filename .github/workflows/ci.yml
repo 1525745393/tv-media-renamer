@@ -142,7 +142,13 @@ jobs:
 
       - name: 构建 Debug APK（验证 Android 构建链路）
         working-directory: mobile
-        run: flutter build apk --debug
+        run: |
+          flutter build apk --debug -v > /tmp/fb.log 2>&1 || {
+            echo "❌ 构建失败，错误片段："
+            grep -iE "error|Error|Exception|failed|FAILURE" /tmp/fb.log | head -30
+            exit 1
+          }
+          echo "✅ Debug APK 构建成功"
 
       - name: 上传 Debug APK
         uses: actions/upload-artifact@v4
