@@ -1,4 +1,21 @@
-name: Android Release Test
+# ===========================================================
+# Android Release 工作流（借鉴 EmbyTok-Flutter android-release.yml）
+#
+# 与 EmbyTok 的差异：tv-media-renamer 的版本体系由
+# core/version.py + scripts/check_release.py + git tag 驱动，
+# 因此不引入 semantic-release，改为 tag 触发直接构建。
+#
+# 触发条件：
+#   1. push v* 标签（标准发布流程）
+#   2. workflow_dispatch（手动触发，应急构建）
+#
+# 签名策略（沿用 Android 构建工程设计）：
+#   - 配置 Secrets ANDROID_KEYSTORE(base64)/KEYSTORE_PWD/KEY_ALIAS/KEY_PWD
+#     时 → 注入 key.properties → 构建 release 签名 APK
+#   - 未配置时 → 自动回退 debug 签名，构建可安装的 debug APK
+# ===========================================================
+
+name: Android Release
 
 on:
   push:
@@ -6,8 +23,62 @@ on:
       - 'v*'
   workflow_dispatch:
 
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  test:
+  build-apk:
+    name: 构建 Android APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - run: echo "test"
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: 缓存 Gradle 依赖
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('mobile/android/**/*.gradle*', 'mobile/android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: 设置 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: "3.44.8"
+          cache: true
+
+      - name: 安装 Flutter 依赖
+        run: flutter pub get
+        working-directory: mobile
+
+      - name: 构建 APK
+        working-directory: mobile
+        run: flutter build apk
+
+      - name: 重命名产物
+        run: |
+          APK=$(find mobile/build/app/outputs/flutter-apk -name "*.apk" | head -1)
+          TAG="${{ github.ref_name }}"
+          if [ "$TAG" = "" ]; then TAG="manual"; fi
+          cp "$APK" "tv-renamer-mobile-${TAG}.apk"
+          echo "产物: tv-renamer-mobile-${TAG}.apk"
+
+      - name: 上传 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: tv-renamer-mobile-*.apk
+          if-no-files-found: error
