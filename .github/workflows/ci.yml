@@ -33,11 +33,11 @@ jobs:
 
       - name: 编译检查（全量字节码编译）
         working-directory: 电影电视剧重命名单文件版
-        run: python3 -m compileall -q core ui modules main scripts/check_release.py
+        run: python3 -m compileall -q core ui modules main scripts/check_release.py server/app.py
 
       - name: Lint（ruff：未使用导入/语法错误类）
         working-directory: 电影电视剧重命名单文件版
-        run: ruff check core/ ui/ modules/ main/ scripts/check_release.py --select F,E9
+        run: ruff check core/ ui/ modules/ main/ scripts/check_release.py server/app.py --select F,E9
 
       - name: 类型检查（mypy：新代码渐进式）
         working-directory: 电影电视剧重命名单文件版
@@ -68,6 +68,18 @@ jobs:
         run: |
           python3 tests/test_media_renamer.py
           python3 tests/test_pattern_recognizer.py
+
+      - name: API 服务冒烟（鉴权 + 健康检查）
+        working-directory: 电影电视剧重命名单文件版
+        run: |
+          API_TOKEN=ci-token PORT=8131 python3 server/app.py > /tmp/api.log 2>&1 &
+          API_PID=$!
+          sleep 4
+          curl -s -o /dev/null -w "无token=%{http_code} " http://127.0.0.1:8131/api/health
+          curl -s -o /dev/null -w "带token=%{http_code}\n" -H "Authorization: Bearer ci-token" http://127.0.0.1:8131/api/health
+          curl -s -H "Authorization: Bearer ci-token" http://127.0.0.1:8131/api/analyze?filename=Game.of.Thrones.S08E03.mkv | grep -q '"type":"tv"'
+          echo "解析 API 正常"
+          kill $API_PID
 
       - name: 版本与 Changelog 校验
         working-directory: 电影电视剧重命名单文件版
